@@ -1,0 +1,18 @@
+# Plan / log files (local only, not for public)
+playbook-update-*.md
+*-plan-*.md
+*.bak
+
+# OS / editor
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Python (eli5-pptx 用)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
