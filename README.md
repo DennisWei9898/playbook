@@ -5,6 +5,43 @@
 
 ---
 
+## 🎨 自動產出高仿真 UI Prototype（huashu-design 加值）
+
+> **裝一行指令，Claude 就會在關鍵 Phase 自動幫你生出可以直接用瀏覽器開啟的高仿真 HTML 畫面，不需要額外下指令。**
+
+```bash
+npx skills add alchaincyf/huashu-design --target ~/.claude/skills/
+```
+
+### 自動觸發時機與產出
+
+| 觸發點 | 產出檔案 | 用途 |
+|--------|---------|------|
+| **Phase 3 BMC 完成後**（商業模式設計完） | `{專案}-ui-mockup-{date}.html` | 用來做用戶訪談的主流程示意圖，讓受訪者看「畫面」而非文字 |
+| **Phase 4 研究報告完成後**（auto-research） | `{專案}-ui-mockup-{date}.html` + `{專案}-landing-{date}.html` | Landing Page 可直接上線收等候名單，UI mockup 用來驗假設 |
+| **Phase 5 功能拆解完成後**（feature-plan） | `docs/feature-{功能名}-ui-draft-{date}.html` | 讓前端、後端、PO 在動工前就對齊 UX 預期，減少返工 |
+
+### 效果說明
+
+huashu-design 產出的是**可在瀏覽器直接開啟的單一 HTML 檔**，特點：
+
+- 🎯 根據你的品牌主色 + logo 自動配色（會先搜尋確認）
+- 📱 Mobile-first，含完整互動流程（表單、按鈕、卡片）
+- 💡 標記「⚙️ 由 huashu-design 自動產出」，清楚區分正式設計與草稿
+- ⚡ 不需要 Figma、不需要設計師，研究完立刻就有畫面可以給人看
+
+### 未安裝時的差異
+
+| | 未安裝 huashu-design | 已安裝 huashu-design |
+|--|---------------------|---------------------|
+| Phase 3 完成 | 純文字 BMC 報告 | 文字報告 **+** 高仿真 UI mockup HTML |
+| Phase 4 完成 | 市場研究 Markdown | 研究報告 **+** Landing Page HTML |
+| Phase 5 完成 | 技術任務清單 | 任務清單 **+** 功能 UI draft HTML |
+
+> 不安裝也能跑完整個 playbook，但少了這個每個 Phase 的交付物就沒有畫面。
+
+---
+
 ## 資料夾結構
 
 ```
