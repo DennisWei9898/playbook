@@ -5,114 +5,9 @@
 
 ---
 
-## 🎨 自動產出高仿真 UI Prototype（huashu-design 加值）
+## 這份 Playbook 在做什麼
 
-> **裝一行指令，Claude 就會在關鍵 Phase 自動幫你生出可以直接用瀏覽器開啟的高仿真 HTML 畫面，不需要額外下指令。**
-
-```bash
-npx skills add alchaincyf/huashu-design --target ~/.claude/skills/
-```
-
-### 自動觸發時機與產出
-
-| 觸發點 | 產出檔案 | 用途 |
-|--------|---------|------|
-| **Phase 3 BMC 完成後**（商業模式設計完） | `{專案}-ui-mockup-{date}.html` | 用來做用戶訪談的主流程示意圖，讓受訪者看「畫面」而非文字 |
-| **Phase 4 研究報告完成後**（auto-research） | `{專案}-ui-mockup-{date}.html` + `{專案}-landing-{date}.html` | Landing Page 可直接上線收等候名單，UI mockup 用來驗假設 |
-| **Phase 5 功能拆解完成後**（feature-plan） | `docs/feature-{功能名}-ui-draft-{date}.html` | 讓前端、後端、PO 在動工前就對齊 UX 預期，減少返工 |
-
-### 效果說明
-
-huashu-design 產出的是**可在瀏覽器直接開啟的單一 HTML 檔**，特點：
-
-- 🎯 根據你的品牌主色 + logo 自動配色（會先搜尋確認）
-- 📱 Mobile-first，含完整互動流程（表單、按鈕、卡片）
-- 💡 標記「⚙️ 由 huashu-design 自動產出」，清楚區分正式設計與草稿
-- ⚡ 不需要 Figma、不需要設計師，研究完立刻就有畫面可以給人看
-
-### 未安裝時的差異
-
-| | 未安裝 huashu-design | 已安裝 huashu-design |
-|--|---------------------|---------------------|
-| Phase 3 完成 | 純文字 BMC 報告 | 文字報告 **+** 高仿真 UI mockup HTML |
-| Phase 4 完成 | 市場研究 Markdown | 研究報告 **+** Landing Page HTML |
-| Phase 5 完成 | 技術任務清單 | 任務清單 **+** 功能 UI draft HTML |
-
-> 不安裝也能跑完整個 playbook，但少了這個每個 Phase 的交付物就沒有畫面。
-
----
-
-## 資料夾結構
-
-```
-playbook/
-├── README.md               ← 本文件（操作手冊）
-├── scripts/
-│   └── update-skills.sh    ← 自動更新 huashu-design + playbook 到最新版
-└── skills/
-    ├── research/           ← 競品調查與市場研究（含進階：競品評分矩陣）
-    ├── feature-plan/       ← 功能規劃與任務拆解（含 Step 3.5 huashu-design UI draft）
-    ├── qa-review/          ← BDD 測試與 QA 報告
-    ├── sdd-update/         ← 技術文件同步維護
-    ├── idea-to-mvp/        ← 全流程引導（整合 skill，含 huashu-design 偵測）
-    │
-    │  ── 進階整合 Skills（從 atomic skills 上一層）──
-    ├── auto-research/      ← 多輪並行研究 orchestrator（自動拆題 + 並行 spawn + huashu-design 串接）
-    └── eli5-pptx/          ← ELI5 簡報生成（4 配色 + python-pptx helpers）
-```
-
-**安裝 Skills**：
-
-```bash
-# 最小版（自帶 5 個 skill，零外部依賴）
-cp -r playbook/skills/* ~/.claude/skills/
-
-# 推薦版：搭配 G-Stack 加值（選配）
-# 1. 先裝 gstack（提供 /office-hours、/qa、/design-shotgun、/ship 等）
-#    詳見 https://github.com/getsentry/gstack 或對應安裝指南
-# 2. 再裝本 playbook
-cp -r playbook/skills/* ~/.claude/skills/
-
-# 全配版：搭配 huashu-design 高仿真 prototype（強烈推薦）
-# huashu-design 在 Phase 3 BMC 完成後 + Phase 5 功能規劃時自動觸發，
-# 產出可直接在瀏覽器開啟的高仿真 HTML prototype。
-npx skills add alchaincyf/huashu-design --target ~/.claude/skills/
-# GitHub：https://github.com/alchaincyf/huashu-design
-```
-
-**保持最新**（huashu-design + playbook 自動更新）：
-
-```bash
-# 用 update-skills.sh 一鍵檢查更新
-bash scripts/update-skills.sh
-```
-
----
-
-## 與 G-Stack 的關係（軟相依）
-
-本 Playbook 的核心 5 個 skill **完全自帶能力**，不需任何外部套件即可運作。
-但如果使用者已經安裝 [G-Stack](https://github.com/getsentry/gstack)，本 Playbook 會在對應 Phase **偵測並建議**搭配以下 G-Stack skill 加強體驗：
-
-| Phase | 自帶能力 | G-Stack 加值（偵測到才建議）| huashu-design 加值（自動觸發）|
-|-------|---------|---------------------------|------------------------------|
-| Phase 0 | 內建 Problem Statement Canvas | `/office-hours` — YC 風格逼問 6 題 | — |
-| Phase 3 | BMC 9 宮格設計 | — | 自動產出主流程 UI mockup HTML（`{專案}-ui-mockup-{date}.html`）|
-| Phase 4 Auto | auto-research 綜合報告 | — | 自動產出 UI mockup + Landing Page HTML |
-| Phase 5 | 內建 `/feature-plan` | `/plan-ceo-review` — scope 送審；`/plan-eng-review` — 架構審 | 技術拆解後自動產出功能 UI draft HTML |
-| Phase 7 | 內建 `/qa-review`（BDD 規格） | `/qa` — 對 live site 跑測試並自動修；`/design-shotgun` — UI 變體探索 | 新功能上線前自動產出 prototype |
-| Phase 7 結尾 | 自動 commit | `/ship` — PR 流程（測試 + version + commit + push）| — |
-
-**為什麼不直接 bundle G-Stack？**
-- G-Stack 是獨立套件（`/gstack-upgrade` 自動更新），複製進來會死在某個版本無法跟上
-- 體積大，會稀釋 Playbook 的核心定位
-- 套件分離後，使用者可以選擇是否要這層加值
-
-偵測邏輯：本 skill 在執行前會用 `ls ~/.claude/skills/{skill-name}/SKILL.md` 偵測，若不存在則直接走 fallback。
-
----
-
-## 整體流程
+從一句 Idea 到 Phase 1 上線，整個流程分成 8 個 Phase，每個 Phase 都有對應的 Claude Code skill 處理：
 
 ```
 Phase 0: Idea 定義（Problem Statement Canvas）
@@ -140,6 +35,110 @@ Phase 7: 自動開發循環 ◄────────────────�
     ↓
 Phase 8: /sdd-update（文件維護）
 ```
+
+核心設計原則：**讓 Claude Code 自主跑完「研究 → 規劃 → 開發 → 測試 → 文件」的完整循環，中間不需要人介入。**
+
+---
+
+## 安裝
+
+```
+playbook/
+├── README.md               ← 本文件（操作手冊）
+├── scripts/
+│   └── update-skills.sh    ← 自動更新 huashu-design + playbook 到最新版
+└── skills/
+    ├── research/           ← 競品調查與市場研究（含進階：競品評分矩陣）
+    ├── feature-plan/       ← 功能規劃與任務拆解
+    ├── qa-review/          ← BDD 測試與 QA 報告
+    ├── sdd-update/         ← 技術文件同步維護
+    ├── idea-to-mvp/        ← 全流程引導（整合 skill）
+    │
+    │  ── 進階整合 Skills ──
+    ├── auto-research/      ← 多輪並行研究 orchestrator（自動拆題 + 並行 spawn）
+    └── eli5-pptx/          ← ELI5 簡報生成（4 配色 + python-pptx helpers）
+```
+
+```bash
+# 最小版（5 個 skill，零外部依賴）
+cp -r playbook/skills/* ~/.claude/skills/
+```
+
+---
+
+## 選配加值
+
+本 Playbook 的核心 skills **完全自帶能力**，以下是兩個獨立的選配加值，裝了之後 Claude 會自動偵測並在對應 Phase 啟用：
+
+### G-Stack（Sentry 出品的 Claude skills 套件）
+
+[G-Stack](https://github.com/getsentry/gstack) 提供 `/office-hours`、`/qa`、`/design-shotgun`、`/ship` 等進階 skill，裝了之後 Playbook 會在對應 Phase 自動偵測並建議搭配使用。
+
+| Phase | 自帶能力 | G-Stack 加值（偵測到才建議）|
+|-------|---------|---------------------------|
+| Phase 0 | Problem Statement Canvas | `/office-hours` — YC 風格逼問 6 題 |
+| Phase 5 | 內建 `/feature-plan` | `/plan-ceo-review` — scope 送審；`/plan-eng-review` — 架構審 |
+| Phase 7 | 內建 `/qa-review`（BDD 規格） | `/qa` — 對 live site 跑測試並自動修；`/design-shotgun` — UI 變體探索 |
+| Phase 7 結尾 | 自動 commit | `/ship` — PR 流程（測試 + version + commit + push）|
+
+### huashu-design（高仿真 HTML UI Prototype，花叔出品）
+
+[huashu-design](https://github.com/alchaincyf/huashu-design) 是一個專門生成高仿真 HTML prototype 的 Claude skill。裝了之後，Playbook 在幾個關鍵 Phase 完成時，會**自動**（不需要額外下指令）幫你生出一份可以直接在瀏覽器開啟的 HTML 畫面，讓你把「研究結論」立刻變成「可以給人看的東西」。
+
+```bash
+npx skills add alchaincyf/huashu-design --target ~/.claude/skills/
+```
+
+**自動觸發時機：**
+
+| 觸發點 | 產出檔案 | 用途 |
+|--------|---------|------|
+| Phase 3 BMC 完成後 | `{專案}-ui-mockup-{date}.html` | 用來做用戶訪談的主流程示意圖，讓受訪者看畫面而非文字 |
+| Phase 4 研究報告完成後（auto-research）| `{專案}-ui-mockup-{date}.html` + `{專案}-landing-{date}.html` | Landing Page 可直接上線收等候名單 |
+| Phase 5 功能拆解完成後（feature-plan）| `docs/feature-{功能名}-ui-draft-{date}.html` | 讓前端、後端、PO 在動工前就對齊 UX 預期 |
+
+**產出的 HTML 特點：**根據你的品牌主色 + logo 自動配色（會先搜尋確認）、Mobile-first、含完整互動流程（表單、按鈕、卡片），不需要 Figma、不需要設計師。
+
+**未安裝時的差異：**
+
+| | 未安裝 | 已安裝 huashu-design |
+|--|--------|---------------------|
+| Phase 3 完成 | 純文字 BMC 報告 | 文字報告 + 高仿真 UI mockup HTML |
+| Phase 4 完成 | 市場研究 Markdown | 研究報告 + Landing Page HTML |
+| Phase 5 完成 | 技術任務清單 | 任務清單 + 功能 UI draft HTML |
+
+**保持最新**（兩個套件一起更新）：
+
+```bash
+bash scripts/update-skills.sh
+```
+
+---
+
+## Skills 速查
+
+### Atomic Skills（單一任務）
+
+| Skill | 觸發方式 | 使用時機 |
+|-------|---------|---------|
+| `/research` | `/research 主題` | 競品調查、市場研究、技術可行性、法規確認 |
+| `/feature-plan` | `/feature-plan 功能描述` | 每個新功能開始前 |
+| `/qa-review` | `/qa-review` | 每個功能實作完成後 |
+| `/sdd-update` | `/sdd-update` | 每次 commit 後 |
+| `/idea-to-mvp` | `/idea-to-mvp [Idea]` | 新專案從零開始，全流程引導 |
+
+### 進階整合 Skills
+
+| Skill | 觸發方式 | 使用時機 | 內部呼叫 |
+|-------|---------|---------|---------|
+| `/auto-research` | `/auto-research [Idea 描述]` | 0→1 商機驗證一氣呵成（拆題→並行→synthesis→評分→驗證菜單）| `/research` × N、`/idea-to-mvp` Phase 2-3 + 5 + 6 |
+| `/eli5-pptx` | `/eli5-pptx [專案代稱]` | 把 reports/ 的研究結論做成 16 slides 簡報 + 講者稿 | python-pptx + 4 預設配色 |
+
+**何時用進階 vs atomic：**
+- 0→1 階段、Idea 還很模糊 → `/auto-research`（自動跑完，省 1-2 小時）
+- 已過商機驗證、進開發 → atomic skills（`/feature-plan`、`/qa-review`、`/sdd-update`）
+- 隨時要驗一個小問題 → `/research`（單次）
+- 要做投影片給人看 → `/eli5-pptx`（吃 reports/ 的內容自動生）
 
 ---
 
@@ -517,35 +516,6 @@ Feature: [功能名稱]
 | SEO 頁面用純 CSR | Google 無法爬取，流量損失 | 任何需要被搜尋到的頁面，必須用 SSG/ISR |
 | 核心操作可被刷 | 假帳號或自動化腳本刷數據 | 核心行為獎勵必須綁定真實可驗證的行為 |
 | Scope Creep（範圍蔓延）| Phase 1 做了 Phase 3 的功能 | 每個功能先問「MVP 邊界三問」再開發 |
-
----
-
-## Skills 速查
-
-### Atomic Skills（單一任務）
-
-| Skill | 觸發方式 | 使用時機 |
-|-------|---------|---------|
-| `/research` | `/research 主題` | 競品調查、市場研究、技術可行性、法規確認 |
-| `/feature-plan` | `/feature-plan 功能描述` | 每個新功能開始前 |
-| `/qa-review` | `/qa-review` | 每個功能實作完成後 |
-| `/sdd-update` | `/sdd-update` | 每次 commit 後 |
-| `/idea-to-mvp` | `/idea-to-mvp [Idea]` | 新專案從零開始，全流程引導 |
-
-### 進階整合 Skills（從 atomic skills 上一層 orchestrator）
-
-| Skill | 觸發方式 | 使用時機 | 內部呼叫 |
-|-------|---------|---------|---------|
-| `/auto-research` | `/auto-research [Idea 描述]` | 0→1 商機驗證一氣呵成（拆題→並行→synthesis→評分→驗證菜單）| `/research` × N、`/idea-to-mvp` Phase 2-3 + 5 + 6 |
-| `/eli5-pptx` | `/eli5-pptx [專案代稱]` | 把 reports/ 的研究結論做成 16 slides 簡報 + 講者稿 | python-pptx + 4 預設配色 |
-
-**何時用進階 vs atomic：**
-- 0→1 階段、Idea 還很模糊 → `/auto-research`（自動跑完，省 1-2 小時）
-- 已過商機驗證、進開發 → atomic skills（`/feature-plan`、`/qa-review`、`/sdd-update`）
-- 隨時要驗一個小問題 → `/research`（單次）
-- 要做投影片給人看 → `/eli5-pptx`（吃 reports/ 的內容自動生）
-
-進階 skills 的所有產出**預設 ELI5 語氣**（用比喻不用術語、故事先於數字、不寫「待 X 確認」「AI 繼續觀察」），讓非技術讀者也能跟上。
 
 ---
 
