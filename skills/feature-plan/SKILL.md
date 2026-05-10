@@ -58,6 +58,37 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 預估規模：S = 半天內，M = 1-2 天，L = 3 天以上
 （L 以上的任務考慮再拆解）
 
+### Step 3.5：UI 設計草稿（若 huashu-design 可用）
+
+在技術任務拆解完成、影響評估開始前，偵測 huashu-design：
+
+```bash
+# 優先偵測全域安裝
+if ls ~/.claude/skills/huashu-design/SKILL.md 2>/dev/null; then
+  HUASHU_AVAILABLE=true
+else
+  # fallback：安裝為內建 skill，標註這是 huashu-design 設計
+  npx skills add alchaincyf/huashu-design --target ~/.claude/skills/ 2>/dev/null \
+    && HUASHU_AVAILABLE=true || HUASHU_AVAILABLE=false
+fi
+```
+
+若 `HUASHU_AVAILABLE=true`，**在用戶確認需求後自動**（不額外詢問）產出 UI draft：
+
+`docs/feature-{功能名}-ui-draft-{YYYY-MM-DD}.html`
+
+**為什麼在這裡做**：
+- 讓前端、後端、PO 在技術拆解前就對齊 UX 預期
+- 早期看到畫面能減少「做完才發現理解不同」的返工
+- UI draft 同時作為 Step 4 影響評估的視覺輔助
+
+**huashu-design 設計要求**（遵守 huashu-design SKILL.md 的核心資產協議）：
+1. 先 WebSearch 確認品牌 logo / 主色調（若有現有產品）
+2. 輸出單一 HTML 檔案，可直接用瀏覽器開啟
+3. 標記「⚙️ 由 huashu-design 自動產出」
+
+若 `HUASHU_AVAILABLE=false`，跳過本步驟，直接進 Step 4。
+
 ### Step 4：影響評估
 
 ```
@@ -132,24 +163,31 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 | 場景 | 觸發的下一個 Skill |
 |------|----------------|
-| 任務清單確認後開始實作 | （直接寫程式碼） |
+| Step 3 技術拆解完成 | Step 3.5 huashu-design UI draft（自動觸發，若可用）|
+| 任務清單確認後開始實作 | （直接寫程式碼）|
 | 實作完一個功能 | `/qa-review` 跑 BDD 測試 |
 | 通過測試後 | `/sdd-update` 同步技術文件 |
 | 設計時遇到不確定的方案 | `/research [方案類型] 業界做法` |
 
 ## G-Stack 加值（如偵測到）
 
-| G-Stack Skill | 用在哪 |
-|--------------|------|
-| `/plan-ceo-review` | Scope 大或方向有疑慮時，從創辦人視角審視「這個值得做嗎」 |
-| `/plan-eng-review` | 架構有風險時，獨立審視可行性與長期維護成本 |
-| `/plan-design-review` | 涉及複雜 UI 流程時，設計師視角審查互動 |
-| `/plan-devex-review` | 開發者面向產品（API / SDK / CLI）必審 |
-| `/autoplan` | 一次跑完上述四種審查（適合大功能） |
+| Skill | 用在哪 |
+|-------|------|
+| G-Stack `/plan-ceo-review` | Scope 大或方向有疑慮時，從創辦人視角審視「這個值得做嗎」 |
+| G-Stack `/plan-eng-review` | 架構有風險時，獨立審視可行性與長期維護成本 |
+| G-Stack `/plan-design-review` | 涉及複雜 UI 流程時，設計師視角審查互動 |
+| G-Stack `/plan-devex-review` | 開發者面向產品（API / SDK / CLI）必審 |
+| G-Stack `/autoplan` | 一次跑完上述四種審查（適合大功能）|
+| **huashu-design** | Step 3.5 自動觸發（技術拆解後），產出高仿真 HTML UI draft（若全域已安裝或安裝成功）|
 
 偵測方式：
 ```bash
+# G-Stack
 ls ~/.claude/skills/plan-ceo-review/SKILL.md 2>/dev/null
+
+# huashu-design（Step 3.5 內建偵測 + fallback 安裝）
+ls ~/.claude/skills/huashu-design/SKILL.md 2>/dev/null \
+  || npx skills add alchaincyf/huashu-design --target ~/.claude/skills/ 2>/dev/null
 ```
 
-存在就建議使用，不存在就跳過不提。
+存在就建議使用（G-Stack）/ 自動觸發（huashu-design），不存在就跳過不提。

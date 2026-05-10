@@ -10,15 +10,17 @@
 ```
 playbook/
 ├── README.md               ← 本文件（操作手冊）
+├── scripts/
+│   └── update-skills.sh    ← 自動更新 huashu-design + playbook 到最新版
 └── skills/
     ├── research/           ← 競品調查與市場研究（含進階：競品評分矩陣）
-    ├── feature-plan/       ← 功能規劃與任務拆解
+    ├── feature-plan/       ← 功能規劃與任務拆解（含 Step 3.5 huashu-design UI draft）
     ├── qa-review/          ← BDD 測試與 QA 報告
     ├── sdd-update/         ← 技術文件同步維護
-    ├── idea-to-mvp/        ← 全流程引導（整合 skill）
+    ├── idea-to-mvp/        ← 全流程引導（整合 skill，含 huashu-design 偵測）
     │
     │  ── 進階整合 Skills（從 atomic skills 上一層）──
-    ├── auto-research/      ← 多輪並行研究 orchestrator（自動拆題 + 並行 spawn）
+    ├── auto-research/      ← 多輪並行研究 orchestrator（自動拆題 + 並行 spawn + huashu-design 串接）
     └── eli5-pptx/          ← ELI5 簡報生成（4 配色 + python-pptx helpers）
 ```
 
@@ -33,6 +35,19 @@ cp -r playbook/skills/* ~/.claude/skills/
 #    詳見 https://github.com/getsentry/gstack 或對應安裝指南
 # 2. 再裝本 playbook
 cp -r playbook/skills/* ~/.claude/skills/
+
+# 全配版：搭配 huashu-design 高仿真 prototype（強烈推薦）
+# huashu-design 在 Phase 3 BMC 完成後 + Phase 5 功能規劃時自動觸發，
+# 產出可直接在瀏覽器開啟的高仿真 HTML prototype。
+npx skills add alchaincyf/huashu-design --target ~/.claude/skills/
+# GitHub：https://github.com/alchaincyf/huashu-design
+```
+
+**保持最新**（huashu-design + playbook 自動更新）：
+
+```bash
+# 用 update-skills.sh 一鍵檢查更新
+bash scripts/update-skills.sh
 ```
 
 ---
@@ -42,12 +57,14 @@ cp -r playbook/skills/* ~/.claude/skills/
 本 Playbook 的核心 5 個 skill **完全自帶能力**，不需任何外部套件即可運作。
 但如果使用者已經安裝 [G-Stack](https://github.com/getsentry/gstack)，本 Playbook 會在對應 Phase **偵測並建議**搭配以下 G-Stack skill 加強體驗：
 
-| Phase | 自帶能力 | G-Stack 加值（偵測到才建議） |
-|-------|---------|---------------------------|
-| Phase 0 | 內建 Problem Statement Canvas | `/office-hours` — YC 風格逼問 6 題 |
-| Phase 5 | 內建 `/feature-plan` | `/plan-ceo-review` — scope 送審；`/plan-eng-review` — 架構審 |
-| Phase 7 | 內建 `/qa-review`（BDD 規格） | `/qa` — 對 live site 跑測試並自動修；`/design-shotgun` — UI 變體探索；`/design-review` — 視覺審查 |
-| Phase 7 結尾 | 自動 commit | `/ship` — PR 流程（測試 + version + commit + push） |
+| Phase | 自帶能力 | G-Stack 加值（偵測到才建議）| huashu-design 加值（自動觸發）|
+|-------|---------|---------------------------|------------------------------|
+| Phase 0 | 內建 Problem Statement Canvas | `/office-hours` — YC 風格逼問 6 題 | — |
+| Phase 3 | BMC 9 宮格設計 | — | 自動產出主流程 UI mockup HTML（`{專案}-ui-mockup-{date}.html`）|
+| Phase 4 Auto | auto-research 綜合報告 | — | 自動產出 UI mockup + Landing Page HTML |
+| Phase 5 | 內建 `/feature-plan` | `/plan-ceo-review` — scope 送審；`/plan-eng-review` — 架構審 | 技術拆解後自動產出功能 UI draft HTML |
+| Phase 7 | 內建 `/qa-review`（BDD 規格） | `/qa` — 對 live site 跑測試並自動修；`/design-shotgun` — UI 變體探索 | 新功能上線前自動產出 prototype |
+| Phase 7 結尾 | 自動 commit | `/ship` — PR 流程（測試 + version + commit + push）| — |
 
 **為什麼不直接 bundle G-Stack？**
 - G-Stack 是獨立套件（`/gstack-upgrade` 自動更新），複製進來會死在某個版本無法跟上

@@ -41,13 +41,25 @@ for skill in office-hours qa qa-only design-shotgun design-review ship plan-ceo-
     echo "✅ $skill 可用"
   fi
 done
+
+# 偵測 huashu-design（高仿真 HTML prototype skill）
+if ls ~/.claude/skills/huashu-design/SKILL.md 2>/dev/null; then
+  echo "✅ huashu-design 可用（高仿真 prototype）"
+  HUASHU_AVAILABLE=true
+else
+  # fallback：嘗試安裝為內建 skill，標註這是 huashu-design 設計
+  npx skills add alchaincyf/huashu-design --target ~/.claude/skills/ 2>/dev/null \
+    && HUASHU_AVAILABLE=true \
+    || HUASHU_AVAILABLE=false
+fi
 ```
 
-把結果存成內部變數 `gstack_available`（一個 set），後續每個 Phase 引用：
+把結果存成內部變數 `gstack_available`（一個 set）+ `HUASHU_AVAILABLE`，後續每個 Phase 引用：
 - 若 G-Stack skill 可用 → 在 Phase 內**建議**使用，由用戶決定
+- 若 huashu-design 可用 → **自動**（不詢問）在設計相關 Phase 產出 HTML prototype
 - 若不可用 → 直接走本 skill 的 fallback，不提
 
-**不要**強迫用戶安裝 G-Stack，本 skill 完全自帶能力。
+**不要**強迫用戶安裝 G-Stack 或 huashu-design，本 skill 完全自帶能力。
 
 ---
 
@@ -279,6 +291,16 @@ Phase 3 報告（`reports/{專案}-business-model-{date}.md`）**必含一節「
 ### 產出檔案
 
 `reports/{專案代稱}-business-model-{YYYY-MM-DD}.md`
+
+### huashu-design 加值（如偵測到）
+
+BMC 完成後，若 `HUASHU_AVAILABLE=true`，**自動**（不詢問）呼叫 huashu-design 產出：
+
+`reports/{專案代稱}-ui-mockup-{YYYY-MM-DD}.html`
+
+高仿真 HTML prototype，涵蓋 BMC 主流程的關鍵畫面。
+**用途**：Phase 4 用戶訪談的「展示素材」—— 讓受訪者能看到、感受產品，
+比純語言描述更能收到具體回饋。
 
 ---
 
@@ -514,6 +536,14 @@ reports/{專案代稱}-business-model-v(n)-{YYYY-MM-DD}.md ← 新版 BMC
 如 `plan-eng-review` 可用：
 > 「架構決策可用 `/plan-eng-review` 送審，獨立審視可行性與風險。」
 
+### huashu-design 加值（如偵測到）
+
+若 `HUASHU_AVAILABLE=true`，功能 scope 確定後，在任務拆解**之前**先用 huashu-design 產出 UI draft：
+
+> 「偵測到 huashu-design。先把這個功能的 UI 畫出來（高仿真 HTML），讓前後端對齊 UX 預期，可減少實作過程中的返工。」
+
+產出放於 `reports/{功能名稱}-ui-draft-{YYYY-MM-DD}.html`，由用戶確認後再進技術任務拆解。
+
 ### 技術任務拆解格式
 
 ```
@@ -598,6 +628,7 @@ reports/{專案代稱}-business-model-v(n)-{YYYY-MM-DD}.md ← 新版 BMC
 | `/design-review` | 對 live site 視覺一致性審查 |
 | `/ship` | 完整 PR 流程（測試 + version bump + commit + push）|
 | `/code-review` | PR 前獨立程式碼審查 |
+| huashu-design | 任何新功能上線前產出高仿真 HTML prototype，讓前後端 + PO 對齊 UX 預期（若 `HUASHU_AVAILABLE=true` 自動觸發）|
 
 ### QA 測試格式
 

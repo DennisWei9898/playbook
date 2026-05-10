@@ -230,6 +230,24 @@ WebSearch + WebFetch，每家公司至少 2-3 個來源
 - 不要寫「Phase 1.4 SAM 估算顯示 SOM 中性值約 NT$90 萬」
 - 改寫成「**這個市場第 1 年大概賺 NT$90 萬 — 1 個人副業 OK，3+ 人團隊不夠養**」
 
+#### Phase 4.5（自動）：UI 示意圖（若 huashu-design 可用）
+
+綜合報告寫完後，**立即**偵測 huashu-design（不等用戶指示）：
+
+```bash
+# 優先全域偵測；找不到則嘗試安裝為內建 skill
+ls ~/.claude/skills/huashu-design/SKILL.md 2>/dev/null \
+  || npx skills add alchaincyf/huashu-design --target ~/.claude/skills/ 2>/dev/null
+```
+
+若偵測到（或安裝成功），**自動**（不詢問）呼叫 huashu-design 產出：
+
+`reports/{專案代稱}-ui-mockup-{YYYY-MM-DD}.html`
+
+內容：基於 Phase 4「商業模式設計」主流程的高仿真 HTML prototype，
+含主畫面佔位 logo、品牌主色調、主要 CTA 流程示意。
+（安裝失敗 → 靜默跳過，不影響主流程）
+
 ---
 
 ### Phase 5：自動觸發競品評分矩陣
@@ -260,6 +278,9 @@ WebSearch + WebFetch，每家公司至少 2-3 個來源
 4. 進入 Phase 5 的判斷標準
 5. 致命訊號表（Pivot / 放棄）
 6. 訪談 / Landing Page 的具體腳本與文案
+7. （若 huashu-design 可用）自動產出可直接瀏覽的 Landing Page HTML：
+   `reports/{專案代稱}-landing-{YYYY-MM-DD}.html`
+   文案來自第 6 點腳本，可直接用於邀請制 Beta 驗證素材。
 
 ---
 
@@ -311,13 +332,15 @@ WebSearch + WebFetch，每家公司至少 2-3 個來源
 
 ```
 reports/
-├── {專案代稱}-phase0-{YYYY-MM-DD}.md          ← 如沒有先補（或讓 /idea-to-mvp phase 0 做）
+├── {專案代稱}-phase0-{YYYY-MM-DD}.md              ← 如沒有先補（或讓 /idea-to-mvp phase 0 做）
 ├── {專案代稱}-{子題1}-research-{YYYY-MM-DD}.md
 ├── {專案代稱}-{子題2}-research-{YYYY-MM-DD}.md
 ├── ...（5-8 份子報告）
-├── {專案代稱}-business-model-{YYYY-MM-DD}.md   ← Phase 2-3 綜合
-├── {專案代稱}-competitor-scoring-{YYYY-MM-DD}.md  ← Phase 5 評分矩陣
-└── {專案代稱}-validation-{YYYY-MM-DD}.md       ← Phase 6 驗證菜單
+├── {專案代稱}-business-model-{YYYY-MM-DD}.md       ← Phase 4 綜合
+├── {專案代稱}-ui-mockup-{YYYY-MM-DD}.html          ← Phase 4.5 UI 示意（huashu-design，如已安裝）
+├── {專案代稱}-competitor-scoring-{YYYY-MM-DD}.md   ← Phase 5 評分矩陣
+├── {專案代稱}-validation-{YYYY-MM-DD}.md           ← Phase 6 驗證菜單
+└── {專案代稱}-landing-{YYYY-MM-DD}.html            ← Phase 6 Landing Page（huashu-design，如已安裝）
 ```
 
 **總時間：** 7-15 分鐘（並行的力量）vs 序列跑 1-2 小時
@@ -387,3 +410,39 @@ skill 行為：
 
 偵測：`ls ~/.claude/skills/plan-ceo-review/SKILL.md 2>/dev/null`
 不存在直接跳過不提。
+
+---
+
+## 與 huashu-design 的串接（高仿真設計，軟相依）
+
+huashu-design（花叔Design）是高仿真 HTML prototype skill，在 Phase 4.5 與 Phase 6 強化交付品質。
+
+### 偵測 + 安裝邏輯
+
+```bash
+# Step 1：偵測全域安裝（優先）
+if ls ~/.claude/skills/huashu-design/SKILL.md 2>/dev/null; then
+  : # 直接引用，不重複安裝
+else
+  # Step 2：fallback — 安裝為內建 skill，標註這是 huashu-design 設計
+  echo "⚙️ 未偵測到全域 huashu-design，嘗試安裝..."
+  npx skills add alchaincyf/huashu-design --target ~/.claude/skills/ 2>/dev/null \
+    && echo "✅ huashu-design 已安裝" \
+    || echo "⚠️ 安裝失敗，跳過設計步驟"
+fi
+```
+
+安裝失敗時**靜默跳過**，不中斷研究主流程、不詢問用戶。
+
+### 串接點
+
+| Phase | 觸發條件 | 產出 |
+|-------|---------|------|
+| Phase 4.5 | Phase 4 綜合報告完成後自動執行 | `{專案代稱}-ui-mockup-{YYYY-MM-DD}.html`（主產品頁 prototype） |
+| Phase 6 | Phase 6 驗證菜單完成後自動執行 | `{專案代稱}-landing-{YYYY-MM-DD}.html`（Landing Page，含 CTA 文案） |
+
+### 更新機制
+
+`scripts/update-skills.sh` 定期（或手動呼叫時）檢查 GitHub 最新版本並自動更新：
+- huashu-design：`alchaincyf/huashu-design`
+- G-Stack：`DennisWei9898/playbook`（playbook 本身）
